@@ -327,8 +327,16 @@ func (m *SnapManager) installPrereqs(t *state.Task, base string, prereq []string
 		if err != nil {
 			return prereqError("prerequisite", prereqName, err)
 		}
-		if ts == nil {
+		if ts == nil || len(ts.Tasks()) == 0 {
 			continue
+		}
+
+		// make the dependencies of the "prerequisite" task wait for the install tasks. Otherwise, the main snap will be
+		// installed in parallel with its prerequisites, resulting in a race condition. Waiting for the last task is
+		// enough since tasks wait for the previous one to be done before running
+		lastPrereqTask := ts.Tasks()[len(ts.Tasks())-1]
+		for _, dep := range t.HaltTasks() {
+			dep.WaitFor(lastPrereqTask)
 		}
 		tss = append(tss, ts)
 	}

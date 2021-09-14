@@ -384,6 +384,16 @@ func createUserDataDirs(info *snap.Info) error {
 		snapUserDir := snap.UserSnapDir(usr.HomeDir, info.SnapName())
 		createDirs = append(createDirs, snapUserDir)
 	}
+
+	// also create the exposed ~/Snap dir
+	exposedUserDir := filepath.Join(usr.HomeDir, dirs.NewUserHomeSnapDir, info.SnapName())
+	otherDirs := []string{
+		filepath.Join(info.UserDataDir(usr.HomeDir), "data"),
+		filepath.Join(info.UserDataDir(usr.HomeDir), "config"),
+		filepath.Join(info.UserDataDir(usr.HomeDir), "cache")}
+	createDirs = append(createDirs, exposedUserDir)
+	createDirs = append(createDirs, otherDirs...)
+
 	for _, d := range createDirs {
 		if err := os.MkdirAll(d, 0755); err != nil {
 			// TRANSLATORS: %q is the directory whose creation failed, %v the error message

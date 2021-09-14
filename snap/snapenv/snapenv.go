@@ -27,6 +27,7 @@ import (
 	"github.com/snapcore/snapd/arch"
 	"github.com/snapcore/snapd/dirs"
 	"github.com/snapcore/snapd/features"
+	"github.com/snapcore/snapd/logger"
 	"github.com/snapcore/snapd/osutil"
 	"github.com/snapcore/snapd/osutil/sys"
 	"github.com/snapcore/snapd/snap"
@@ -115,7 +116,14 @@ func userEnv(info *snap.Info, home string) osutil.Environment {
 	} else {
 		// Snaps using strict or devmode confinement get an override for both
 		// HOME and XDG_RUNTIME_DIR.
-		env["HOME"] = info.UserDataDir(home)
+		env["HOME"] = info.SnapHome(home)
+		env["SNAP_USER_HOME"] = info.SnapHome(home)
+
+		logger.Debugf("Setting XDG env vars")
+		env["XDG_DATA_HOME"] = filepath.Join(info.UserDataDir(home), "data")
+		env["XDG_CONFIG_HOME"] = filepath.Join(info.UserDataDir(home), "config")
+		//env["XDG_STATE_HOME"] = filepath.Join(info.UserDataDir(home), ".state")
+		env["XDG_CACHE_HOME"] = filepath.Join(info.UserDataDir(home), "cache")
 		env["XDG_RUNTIME_DIR"] = info.UserXdgRuntimeDir(sys.Geteuid())
 	}
 	// Provide the location of the real home directory.

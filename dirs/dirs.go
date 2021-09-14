@@ -37,9 +37,14 @@ var (
 
 	DistroLibExecDir string
 
-	SnapBlobDir               string
-	SnapDataDir               string
-	SnapDataHomeGlob          string
+	SnapBlobDir      string
+	SnapDataDir      string
+	SnapDataHomeGlob string
+
+	// experimental
+	SnapHiddenDataHomeGlob string
+	SnapNewDataHomeGlob    string
+
 	SnapDownloadCacheDir      string
 	SnapAppArmorDir           string
 	SnapAppArmorAdditionalDir string
@@ -142,6 +147,11 @@ const (
 	// Directory with snap data inside user's home
 	UserHomeSnapDir = "snap"
 
+	// HiddenUserHomeSnapDir is an experimental flag to enable hiding the snap dir
+	HiddenUserHomeSnapDir = ".snap/data"
+	// NewUserHomeSnapDir is an experimental flag to enable moving the snap dir to a new location
+	NewUserHomeSnapDir = "Snap"
+
 	// LocalInstallBlobTempPrefix is used by local install code:
 	// * in daemon to spool the snap file to <SnapBlobDir>/<LocalInstallBlobTempPrefix>*
 	// * in snapstate to auto-cleans them up using the same prefix
@@ -153,13 +163,27 @@ var (
 	snappyDir = filepath.Join("var", "lib", "snapd")
 
 	callbacks = []func(string){}
+
+	HomeFlags HomeDirFlags
 )
 
 func init() {
 	// init the global directories at startup
 	root := os.Getenv("SNAPPY_GLOBAL_ROOT")
+	_, hide := os.LookupEnv("SNAPD_HIDE_HOME")
+	_, newDir := os.LookupEnv("SNAPD_NEW_HOME")
+
+	HomeFlags = HomeDirFlags{
+		Hidden:       hide,
+		NewDirectory: newDir,
+	}
 
 	SetRootDir(root)
+}
+
+type HomeDirFlags struct {
+	Hidden       bool
+	NewDirectory bool
 }
 
 // StripRootDir strips the custom global root directory from the specified argument.
@@ -316,7 +340,11 @@ func SetRootDir(rootdir string) {
 	}
 
 	SnapDataDir = filepath.Join(rootdir, "/var/snap")
+
 	SnapDataHomeGlob = filepath.Join(rootdir, "/home/*/", UserHomeSnapDir)
+	SnapHiddenDataHomeGlob = filepath.Join(rootdir, "/home/*/", HiddenUserHomeSnapDir)
+	SnapNewDataHomeGlob = filepath.Join(rootdir, "/home/*/", NewUserHomeSnapDir)
+
 	SnapAppArmorDir = filepath.Join(rootdir, snappyDir, "apparmor", "profiles")
 	SnapConfineAppArmorDir = filepath.Join(rootdir, snappyDir, "apparmor", "snap-confine")
 	SnapAppArmorAdditionalDir = filepath.Join(rootdir, snappyDir, "apparmor", "additional")

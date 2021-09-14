@@ -1,0 +1,66 @@
+skype
+~/.snap/data/skype/current
+.  ..  cache  .config  config  data  .last_revision  .local  logs  .themes
+~/.snap/data/skype/common
+.  ..  .cache
+~/Snap/skype
+.  ..  .pki
+
+firefox
+~/.snap/data/firefox/current
+.  ..  cache  .config  config  data  .last_revision  .local  .themes
+~/.snap/data/firefox/common
+.  ..  .cache  .mozilla
+~/Snap/firefox
+.  ..
+
+chromium
+~/.snap/data/chromium/current
+.  ..  cache  .config  config  data  .last_revision  .local  .themes
+~/.snap/data/chromium/common
+.  ..  .cache  chromium
+~/Snap/chromium
+.  ..  .pki
+
+spotify
+~/.snap/data/spotify/current
+.  ..  cache  .config  config  data  .last_revision  .local  .themes
+~/.snap/data/spotify/common
+.  ..  .cache
+~/Snap/spotify
+.  ..  .pki
+
+gimp
+~/.snap/data/gimp/current
+.  ..  cache  .config  config  data  .last_revision  .local  .themes
+~/.snap/data/gimp/common
+.  ..  .cache
+~/Snap/gimp
+.  ..
+
+slack
+~/.snap/data/slack/current
+.  ..  cache  config  data  .local  .themes
+~/.snap/data/slack/common
+.  ..  .cache
+~/Snap/slack
+.  ..
+
+vlc
+~/.snap/data/vlc/current
+.  ..  cache  .config  config  data  .last_revision  .local  .themes
+~/.snap/data/vlc/common
+.  ..  .cache  vlcrc
+~/Snap/vlc
+.  ..
+
+code
+~/.snap/data/code/current
+.  ..  cache  config  data
+~/.snap/data/code/common
+.  ..  .cache
+~/Snap/code
+.  ..
+
+Note on filepickers: 
+	* VLC opens a file picker in $HOME, so in ~/Snap/vlc which fits the intended usage

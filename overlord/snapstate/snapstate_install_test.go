@@ -4735,8 +4735,12 @@ type: base
 		chg.AddAll(ts)
 	}
 
+	s.state.Unlock()
+	defer s.state.Lock()
 	defer s.se.Stop()
 	s.settle(c)
+	s.state.Lock()
+	defer s.state.Unlock()
 
 	c.Assert(chg.Err(), IsNil)
 	c.Assert(chg.IsReady(), Equals, true)

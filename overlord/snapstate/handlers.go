@@ -1078,33 +1078,19 @@ func (m *SnapManager) doUnlinkCurrentSnap(t *state.Task, _ *tomb.Tomb) (err erro
 
 		action := triggeredMigration(oldInfo.Base, newInfo.Base, opts)
 		switch action {
-		case full:
-			// we're reverting forward to a core22 based revision, so we already
-			// migrated previously and should use the ~/Snap sub dir as HOME again
-			snapsup.EnableExposedHome = true
-			fallthrough
 		case hidden:
 			if err := m.backend.HideSnapData(snapsup.InstanceName()); err != nil {
 				return err
 			}
 
 			snapsup.MigratedHidden = true
-		case home:
-			// we're reverting forward to a core22 based revision, so we already
-			// migrated previously and should use the ~/Snap sub dir as HOME again
-			snapsup.EnableExposedHome = true
 
-		case revertFull:
-			snapsup.DisableExposedHome = true
-			fallthrough
 		case revertHidden:
 			if err := m.backend.UndoHideSnapData(snapsup.InstanceName()); err != nil {
 				return err
 			}
 
 			snapsup.UndidHiddenMigration = true
-		case disableHome:
-			snapsup.DisableExposedHome = true
 		}
 
 		if err = SetTaskSnapSetup(t, snapsup); err != nil {
@@ -1142,14 +1128,6 @@ func (m *SnapManager) undoUnlinkCurrentSnap(t *state.Task, _ *tomb.Tomb) error {
 	// revert them here and set SnapSetup flags (which will be used to set the
 	// state below)
 	if snapsup.Revert {
-		if snapsup.EnableExposedHome {
-			snapsup.DisableExposedHome = true
-			snapsup.EnableExposedHome = false
-		} else if snapsup.DisableExposedHome {
-			snapsup.DisableExposedHome = false
-			snapsup.EnableExposedHome = true
-		}
-
 		if snapsup.MigratedHidden {
 			if err := m.backend.UndoHideSnapData(snapsup.InstanceName()); err != nil {
 				return err
@@ -1274,28 +1252,6 @@ func (m *SnapManager) doCopySnapData(t *state.Task, _ *tomb.Tomb) (err error) {
 		}
 
 		snapsup.UndidHiddenMigration = true
-	case full:
-		if err := m.backend.HideSnapData(snapName); err != nil {
-			return err
-		}
-
-		snapsup.MigratedHidden = true
-		fallthrough
-	case home:
-		undo, err := m.backend.InitExposedSnapHome(snapName, newInfo.Revision)
-		if err != nil {
-			return err
-		}
-		st.Lock()
-		t.Set("undo-exposed-home-init", undo)
-		st.Unlock()
-
-		snapsup.MigratedToExposedHome = true
-
-		// no specific undo action is needed since undoing the copy will undo this
-		if err := m.backend.InitXDGDirs(newInfo); err != nil {
-			return err
-		}
 	}
 
 	st.Lock()
@@ -1312,14 +1268,6 @@ const (
 	hidden migration = "hidden"
 	// revertHidden undoes the hidden migration (i.e., moves ~/.snap to ~/snap)
 	revertHidden migration = "revertHidden"
-	// home migrates the new home to ~/Snap
-	home migration = "home"
-	// full migrates ~/snap to ~/.snap and the new home to ~/Snap
-	full migration = "full"
-	// disableHome disables ~/Snap as HOME
-	disableHome migration = "disableHome"
-	// revertFull disables ~/Snap as HOME and undoes the hidden migration
-	revertFull migration = "revertFull"
 )
 
 func triggeredMigration(oldBase, newBase string, opts *dirMigrationOptions) migration {
@@ -1334,62 +1282,6 @@ func triggeredMigration(oldBase, newBase string, opts *dirMigrationOptions) migr
 	}
 
 	return none
-
-	/* TODO:Snap-folder:
-	             after a discussion during the May 2022 sprint with Copenhagen
-		     it was decided to not do the migration to ~/Snap for all
-		     snaps with "base: core22" but instead add an opt-in mechanism
-
-				// we're refreshing to a core22 revision
-				if atLeastCore22(newBase) {
-					if opts.MigratedToHidden && !opts.MigratedToExposedHome {
-						// ~/.snap migration already happened so initialize ~/Snap only
-						return home
-					}
-
-					if !opts.MigratedToHidden {
-						//  nothing was migrated yet, so migrate to ~/.snap and ~/Snap
-						return full
-					}
-				} else {
-					// going back from core22
-					if atLeastCore22(oldBase) {
-						if opts.MigratedToExposedHome && opts.MigratedToHidden && !opts.UseHidden {
-							return revertFull
-						}
-
-						if opts.MigratedToExposedHome && opts.MigratedToHidden && opts.UseHidden {
-							return disableHome
-						}
-					} else {
-						if !opts.MigratedToHidden && opts.UseHidden {
-							// flag is set and not migrated yet
-							return hidden
-						}
-
-						if opts.MigratedToHidden && !opts.UseHidden {
-							// migration was done but flag was unset
-							return revertHidden
-						}
-					}
-				}
-
-				return none
-	*/
-}
-
-// atLeastCore22 returns true if 'base' is core22 or newer. Returns
-// false if it's older or it cannot be determined.
-func atLeastCore22(base string) bool {
-	if !strings.HasPrefix(base, "core") {
-		return false
-	}
-
-	if num, err := strconv.Atoi(base[4:]); err != nil || num < 22 {
-		return false
-	}
-
-	return true
 }
 
 func (m *SnapManager) undoCopySnapData(t *state.Task, _ *tomb.Tomb) error {
@@ -1413,25 +1305,7 @@ func (m *SnapManager) undoCopySnapData(t *state.Task, _ *tomb.Tomb) error {
 
 	// undo migration actions performed in doCopySnapData and set SnapSetup flags
 	// accordingly (they're used in undoUnlinkCurrentSnap to set SnapState)
-	if snapsup.MigratedToExposedHome || snapsup.MigratedHidden || snapsup.UndidHiddenMigration {
-		if snapsup.MigratedToExposedHome {
-			var undoInfo backend.UndoInfo
-
-			st.Lock()
-			err := t.Get("undo-exposed-home-init", &undoInfo)
-			st.Unlock()
-			if err != nil {
-				return err
-			}
-
-			if err := m.backend.UndoInitExposedSnapHome(snapsup.InstanceName(), &undoInfo); err != nil {
-				return err
-			}
-
-			snapsup.MigratedToExposedHome = false
-			snapsup.RemovedExposedHome = true
-		}
-
+	if snapsup.MigratedHidden || snapsup.UndidHiddenMigration {
 		if snapsup.MigratedHidden {
 			if err := m.backend.UndoHideSnapData(snapsup.InstanceName()); err != nil {
 				return err
@@ -1958,12 +1832,6 @@ func setMigrationFlagsinState(snapst *SnapState, snapsup *SnapSetup) {
 		snapst.MigratedHidden = true
 	} else if snapsup.UndidHiddenMigration {
 		snapst.MigratedHidden = false
-	}
-
-	if snapsup.MigratedToExposedHome || snapsup.EnableExposedHome {
-		snapst.MigratedToExposedHome = true
-	} else if snapsup.RemovedExposedHome || snapsup.DisableExposedHome {
-		snapst.MigratedToExposedHome = false
 	}
 }
 

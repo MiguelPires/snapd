@@ -1,0 +1,74 @@
+summary: Reproduce bug in pre-download flow with multiple snaps
+
+prepare: |
+  snap set system experimental.parallel-instances=true
+
+restore: |
+  snap set system experimental.parallel-instances!
+
+debug: |
+  snap changes
+  snap list
+
+execute: |
+  changeAfterID() {
+    local OLD_CHANGE="$1"
+    local NEW_CHANGE
+
+    for _ in $(seq 5); do
+      NEW_CHANGE=$(snap changes | tail -n 2 | head -n 1 | awk '{print $1}')
+      if [ "$NEW_CHANGE" -gt "$OLD_CHANGE" ]; then
+        break
+      fi
+
+      snap debug ensure-state-soon
+      sleep 1s
+    done
+
+    if [ "$NEW_CHANGE" -le "$OLD_CHANGE" ]; then
+      echo "expected a change with an id greater than $OLD_CHANGE"
+      exit 1
+    fi
+  }
+
+  snap refresh --unhold
+  snap refresh
+
+  snap install test-snapd-sh test-snapd-sh_foo
+
+  test-snapd-sh.sh -c "while [ ! -e stamp ]; do sleep 1; done" &
+  APP_PID="$!"
+  tests.cleanup defer "kill \"$APP_PID\" || true"
+
+  test-snapd-sh_foo.sh -c "while [ ! -e stamp_foo ]; do sleep 1; done" &
+  APP_PID="$!"
+  tests.cleanup defer "kill \"$APP_PID\" || true"
+
+  # trigger an auto-refresh
+  OLD_CHANGE=$(snap changes | tail -n 2 | head -n 1 | awk '{print $1}')
+  systemctl stop snapd.{service,socket}
+  "$TESTSTOOLS"/snapd-state change-snap-channel test-snapd-sh edge
+  "$TESTSTOOLS"/snapd-state change-snap-channel test-snapd-sh_foo edge
+  "$TESTSTOOLS"/snapd-state force-autorefresh
+  systemctl start snapd.{socket,service}
+
+  # check that a change was triggered and it's a pre-download
+  changeAfterID "$OLD_CHANGE"
+  if ! retry -n 10 sh -c 'snap changes | tail -n 2 | grep "Done.*Pre-download tasks for auto-refresh"'; then
+    echo "expected a completed pre-download change"
+    exit 1
+  fi
+
+  touch stamp
+  sleep 1
+  touch stamp_foo
+
+  # at least one completed auto-refresh (there may be more, if the second snap
+  # wasn't closed in time to be in the first auto-refresh)
+  if retry -n 10 sh -c 'snap changes | tail -n 2 | grep "Done.*Auto-refresh.*snap.*test-snapd-sh"'; then
+    echo "expected a completed auto-refresh change"
+  fi
+
+  # both should be refreshed
+  snap list | grep -E "test-snapd-sh.*1\.0.*7.*latest/edge"
+  snap list | grep -E "test-snapd-sh_foo.*1\.0.*7.*latest/edge"

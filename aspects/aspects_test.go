@@ -694,3 +694,68 @@ func (s *aspectSuite) TestAspectGetNoMatchRequestLongerThanPattern(c *C) {
 	err = aspect.Get(databag, "snapd.status", &value)
 	c.Assert(err, testutil.ErrorIs, &aspects.NotFoundError{})
 }
+
+func (s *aspectSuite) TestAspectManyPrefixMatches(c *C) {
+	databag := aspects.NewJSONDataBag()
+	aspectBundle, err := aspects.NewAspectBundle("acc", "bundle", map[string]interface{}{
+		"statuses": []map[string]string{
+			{"name": "status.firefox", "path": "snaps.firefox.status"},
+			{"name": "status.snapd", "path": "snaps.snapd.status"},
+		},
+	}, aspects.NewJSONSchema())
+	c.Assert(err, IsNil)
+
+	aspect := aspectBundle.Aspect("statuses")
+	err = aspect.Set(databag, "status.firefox", "active")
+	c.Assert(err, IsNil)
+
+	err = aspect.Set(databag, "status.snapd", "disabled")
+	c.Assert(err, IsNil)
+
+	var value interface{}
+	err = aspect.Get(databag, "status", &value)
+	c.Assert(err, IsNil)
+	c.Assert(value, DeepEquals, map[string]interface{}{
+		"status": map[string]interface{}{
+			"snapd":   "disabled",
+			"firefox": "active",
+		},
+	})
+}
+
+func (s *aspectSuite) TestAspectCombineNamespacesInPrefixMatches(c *C) {
+	databag := aspects.NewJSONDataBag()
+	aspectBundle, err := aspects.NewAspectBundle("acc", "bundle", map[string]interface{}{
+		"statuses": []map[string]string{
+			{"name": "status.foo.bar.firefox", "path": "snaps.firefox.status"},
+			{"name": "status.foo.snapd", "path": "snaps.snapd.status"},
+		},
+	}, aspects.NewJSONSchema())
+	c.Assert(err, IsNil)
+
+	databag.Set("snaps", map[string]interface{}{
+		"firefox": map[string]interface{}{
+			"status": "active",
+		},
+		"snapd": map[string]interface{}{
+			"status": "disabled",
+		},
+	})
+
+	aspect := aspectBundle.Aspect("statuses")
+
+	var value interface{}
+	err = aspect.Get(databag, "status", &value)
+	c.Assert(err, IsNil)
+	fmt.Println(value)
+	c.Assert(value, DeepEquals, map[string]interface{}{
+		"status": map[string]interface{}{
+			"foo": map[string]interface{}{
+				"bar": map[string]interface{}{
+					"firefox": "active",
+				},
+				"snapd": "disabled",
+			},
+		},
+	})
+}

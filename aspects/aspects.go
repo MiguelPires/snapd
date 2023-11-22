@@ -321,7 +321,7 @@ func (a *Aspect) Set(databag DataBag, name string, value interface{}) error {
 func (a *Aspect) Get(databag DataBag, name string, value interface{}) error {
 	// try to find a access pattern that matches the request exactly
 	exactMatch := true
-	path, unmatched, err := a.getMatchingPath(name, exactMatch)
+	paths, unmatched, err := a.getMatchingPaths(name, exactMatch)
 	if err != nil && !errors.Is(err, &NotFoundError{}) {
 		return err
 	}
@@ -329,34 +329,61 @@ func (a *Aspect) Get(databag DataBag, name string, value interface{}) error {
 	// no exact match, try to match a prefix of a pattern
 	if errors.Is(err, &NotFoundError{}) {
 		exactMatch = false
-		path, unmatched, err = a.getMatchingPath(name, exactMatch)
+		paths, unmatched, err = a.getMatchingPaths(name, exactMatch)
 		if err != nil {
 			return err
 		}
 	}
 
-	var val interface{}
-	if err := databag.Get(path, &val); err != nil {
-		var pathErr PathNotFoundError
-		if errors.As(err, &pathErr) {
-			return &NotFoundError{
-				Account:    a.bundle.Account,
-				BundleName: a.bundle.Name,
-				Aspect:     a.Name,
-				Field:      name,
-				Cause:      string(pathErr),
+	var results []interface{}
+	var namespaces [][]string
+	for i, path := range paths {
+		var val interface{}
+		if err := databag.Get(path, &val); err != nil {
+			var pathErr PathNotFoundError
+			if errors.As(err, &pathErr) {
+				return &NotFoundError{
+					Account:    a.bundle.Account,
+					BundleName: a.bundle.Name,
+					Aspect:     a.Name,
+					Field:      name,
+					Cause:      string(pathErr),
+				}
+			}
+			return err
+		}
+
+		// if there's just one exact match, there can only be one result
+		if exactMatch {
+			*value.(*interface{}) = map[string]interface{}{name: val}
+			return nil
+		}
+
+		results = append(results, val)
+		namespaces = append(namespaces, unmatched[i])
+	}
+
+	// merge the namespaces of the multiple partial matches
+	merged := map[string]interface{}{}
+	for e, namespaceParts := range namespaces {
+		topLevel := merged
+
+		for i, part := range namespaceParts {
+			if i == len(namespaceParts)-1 {
+				// the last element of the namespace maps to the obtained value
+				topLevel[part] = results[e]
+			} else {
+				if _, ok := topLevel[part]; !ok {
+					topLevel[part] = map[string]interface{}{}
+				}
+
+				topLevel = topLevel[part].(map[string]interface{})
 			}
 		}
-		return err
 	}
 
-	// build the response as namespaced map with the unmatched parts as nested levels
-	for i := len(unmatched) - 1; i >= 0; i-- {
-		val = map[string]interface{}{unmatched[i]: val}
-	}
-
-	// use the request to cut through the response namespace
-	*value.(*interface{}) = map[string]interface{}{name: val}
+	// the top level maps the request to the remaining namespace
+	*value.(*interface{}) = map[string]interface{}{name: merged}
 	return nil
 }
 
@@ -364,7 +391,7 @@ func (a *Aspect) Get(databag DataBag, name string, value interface{}) error {
 // or matching a prefix of the request name is ok. It returns the storage path
 // of the matching pattern. If the name was matched with a prefix of a rule, the
 // unmatched name parts are returned as well.
-func (a *Aspect) getMatchingPath(name string, exactMatch bool) (path string, unmachedParts []string, err error) {
+func (a *Aspect) getMatchingPaths(name string, exactMatch bool) (paths []string, unmatchedParts [][]string, err error) {
 	subkeys := strings.Split(name, ".")
 
 	for _, accessPatt := range a.accessPatterns {
@@ -375,23 +402,31 @@ func (a *Aspect) getMatchingPath(name string, exactMatch bool) (path string, unm
 
 		path, err := accessPatt.getPath(placeholders)
 		if err != nil {
-			return "", nil, err
+			return nil, nil, err
 		}
+		paths = append(paths, path)
+		unmatchedParts = append(unmatchedParts, unmatched)
 
 		if !accessPatt.isReadable() {
-			return "", nil, &InvalidAccessError{RequestedAccess: read, FieldAccess: accessPatt.access, Field: name}
+			return nil, nil, &InvalidAccessError{RequestedAccess: read, FieldAccess: accessPatt.access, Field: name}
 		}
 
-		return path, unmatched, nil
+		if exactMatch {
+			return paths, unmatchedParts, nil
+		}
 	}
 
-	return "", nil, &NotFoundError{
-		Account:    a.bundle.Account,
-		BundleName: a.bundle.Name,
-		Aspect:     a.Name,
-		Field:      name,
-		Cause:      "field not found",
+	if len(paths) == 0 {
+		return nil, nil, &NotFoundError{
+			Account:    a.bundle.Account,
+			BundleName: a.bundle.Name,
+			Aspect:     a.Name,
+			Field:      name,
+			Cause:      "field not found",
+		}
 	}
+
+	return paths, unmatchedParts, nil
 }
 
 func newAccessPattern(name, path, accesstype string) (*accessPattern, error) {

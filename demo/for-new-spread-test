@@ -1,0 +1,62 @@
+# we can write
+$ snap set NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps.snapd.status=enabled
+
+# we can read in the usual ways supported by the previous snap get
+$ snap get NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps.snapd.status
+enabled
+
+# the name is a placeholder so we can it can take any value
+$ snap set NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps.htop.status=disabled
+
+$ snap get -d NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps
+{
+	"snaps": {
+		"htop": {
+			"status": "disabled"
+		},
+		"snapd": {
+			"status": "enabled"
+		}
+	}
+}
+
+# we can also delete data
+$ snap unset NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps.htop.status
+
+# the data we get out is a virtual document built from data pulled out of many
+# storage paths, as described in the aspect rules
+$ snap set NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps.snapd.revision=2
+$ snap get -d NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps.snapd
+{
+	"snaps.snapd": {
+		"status": "disabled",
+		"revision": "2"
+	}
+}
+
+# the schema allows us to restrict the data we write 
+$ snap set NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps.snapd.status=on
+error: cannot accept element in "snaps.snapd.status": string "on" is not one of the allowed choices
+
+$ snap set NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses snaps.snapd.revision=-1
+error: cannot accept element in "data.revision.snapd": -1 is less than the allowed minimum 1
+
+
+# we can have read-only rules
+$ snap get NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses system-status
+$ snap set NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses system-status=enabled
+error: cannot set "system-status" in aspect NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses:
+       no matching write rule
+
+# since reading builds a virtual document based on the rules that match the request 
+# and an empty request matches every read request, we can see the entire virtual document
+$ snap get -d NI7Jstuu8gffcoXr02i1kYt898p6Co0A/demo-snaps/statuses
+{
+	"snaps": {
+		"snapd": {
+			"status": "disabled",
+			"revision": "2"
+		}
+	},
+	"system-status": "disabled"
+}

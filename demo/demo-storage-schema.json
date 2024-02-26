@@ -1,0 +1,31 @@
+{
+	"types": {
+		"snap-name": {"type": "string", "pattern": "^[a-z0-9]{1,7}$"},
+		"snap-rev": {"type": "int", "min": 1}
+	},
+	"schema":{
+		"snaps":{
+			"values":{
+				"schema":{
+					"status":{
+						"type":"string",
+						"choices":["enabled","disabled"]
+					}
+				}
+			},
+			"keys":"$snap-name"
+		},
+		"data": {
+			"schema": {
+				"revision": {
+					"type": "map",
+					"values": {
+						"type": "int",
+						"min": 1
+					},
+					"keys":"$snap-name"
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,31 @@
+# feed through jq -jS | jq -sR to sort and escape quotes and newlines
+{
+  "storage": {
+		"aliases": {
+			"snap-name": {
+				"type": "string",
+				"pattern": "^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$"
+			}
+		},
+		"schema": {
+      "statuses": {
+				"keys": "$snap-name",
+				"values": {
+					"type": "string",
+					"choices": ["enabled", "disabled"]
+				}
+      },
+			"snaps": {
+				"keys": "$snap-name",
+				"values": {
+					"schema": {
+						"revision": {
+							"type": "int",
+							"min": 1
+						}
+					}
+				}
+			}
+    }
+  }
+}

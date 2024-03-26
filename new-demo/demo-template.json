@@ -1,0 +1,17 @@
+{
+	"type": "aspect-bundle",
+	"account-id": "NI7Jstuu8gffcoXr02i1kYt898p6Co0A",
+	"authority-id": "NI7Jstuu8gffcoXr02i1kYt898p6Co0A",
+	"name": "demo",
+	"aspects": {
+		"statuses": {
+			"rules": [
+				{"request": "{name}.status", "storage": "statuses.{name}"},
+				{"request": "{name}.revision", "storage": "snaps.{name}.revision"},
+				{"request": "system-status", "storage": "statuses.snapd"}
+			]
+		}
+	},
+	"body": "{\n  \"storage\": {\n    \"aliases\": {\n      \"snap-name\": {\n        \"pattern\": \"^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$\",\n        \"type\": \"string\"\n      }\n    },\n    \"schema\": {\n      \"snaps\": {\n        \"keys\": \"$snap-name\",\n        \"values\": {\n          \"schema\": {\n            \"revision\": {\n              \"min\": 1,\n              \"type\": \"int\"\n            }\n          }\n        }\n      },\n      \"statuses\": {\n        \"keys\": \"$snap-name\",\n        \"values\": {\n          \"choices\": [\n            \"enabled\",\n            \"disabled\"\n          ],\n          \"type\": \"string\"\n        }\n      }\n    }\n  }\n}",
+	"timestamp": "2024-03-25T14:31:32Z"
+}

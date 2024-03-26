@@ -1,0 +1,64 @@
+type: aspect-bundle
+authority-id: NI7Jstuu8gffcoXr02i1kYt898p6Co0A
+account-id: NI7Jstuu8gffcoXr02i1kYt898p6Co0A
+name: demo
+aspects:
+  statuses:
+    rules:
+      -
+        request: {name}.status
+        storage: statuses.{name}
+      -
+        request: {name}.revision
+        storage: snaps.{name}.revision
+      -
+        request: system-status
+        storage: statuses.snapd
+timestamp: 2024-03-25T14:31:32Z
+body-length: 592
+sign-key-sha3-384: MwnYsB0vnhCuWmR9gtxL3mgLYtk6uU8KDUzpf6klA43pceWd1mRxf0WUawk75HEe
+
+{
+  "storage": {
+    "aliases": {
+      "snap-name": {
+        "pattern": "^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$",
+        "type": "string"
+      }
+    },
+    "schema": {
+      "snaps": {
+        "keys": "$snap-name",
+        "values": {
+          "schema": {
+            "revision": {
+              "min": 1,
+              "type": "int"
+            }
+          }
+        }
+      },
+      "statuses": {
+        "keys": "$snap-name",
+        "values": {
+          "choices": [
+            "enabled",
+            "disabled"
+          ],
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+
+AcLBcwQAAQoAHRYhBNDLFCN53St/SiQBL1sZV6rdPCpOBQJmAwUqAAoJEFsZV6rdPCpOL6oP/RM7
+g2T1wyg5Jg3Qb6r2e4TFqvkrGgvI9kta5Y5XQi3yVgxM5GjXsL+Ai1MJQXRgkvzF1bLTWA3aI0W6
+kbqg6kPTHLKNgbMTIVK+RqmX0W3p9ZgmwYeaCH8Xkd6v+/nUF6gW3dwN6DhdJEYfLCyQ3pRdok6r
+243Ont8F8pze09WF7xSv1p9mfNjmNrOOs60xukpw0or/csNCAhnLI48+Tl4O51QZ1ZCLtM8h2ICe
+29vmbVaCo/EQ0UM5mBWvtYkCu5MKGs2mS+LH3fiGrGFnLoprWCLNMbnaTQYEMNVJybI9+LDSvwaW
+d7TlhKdiCeN8zg2cjh24JMaz1g1tnH69dCaPFhslMZ/TWxTJheYqk+SRHeHxwRfzGkLPhb6koW4V
+kgL667weQADCAl/3GH31+nUaV0hPx8Yfchhq3umfUqaiNcqJhinxV/3t5IWha7cBNQvzizAnYSQg
+q+ei9GXKmgEDIjnWIqzq+Z7WXF2p9AS3PQ5PRR2MoUGKwTsYDiD7hJl7R7ULjxOwRDcP4ypUz7xq
+X3toThZM+vHesgdTCuSvC4APuotLgqauHZagM1VZZVwQqqV8MtlsYnW21h5tWtvtSgMQyr6hVdHm
+LK5CB3Vzuln+kKEnTEA1oACgpsXuEW24uq98sYS5iye7WC7hsuUGuq3Pi8iOT7jN6zMxGX9V

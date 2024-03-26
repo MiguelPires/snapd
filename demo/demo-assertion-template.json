@@ -12,6 +12,6 @@
 			]
 		}
 	},
-	"storage": "{\"types\":{\"snap-name\":{\"type\":\"string\",\"pattern\":\"^[a-z0-9]{1,7}$\"},\"snap-rev\":{\"type\":\"int\",\"min\":1}},\"schema\":{\"snaps\":{\"values\":{\"schema\":{\"status\":{\"type\":\"string\",\"choices\":[\"enabled\",\"disabled\"]}}},\"keys\":\"$snap-name\"},\"data\":{\"schema\":{\"revision\":{\"type\":\"map\",\"values\":{\"type\":\"int\",\"min\":1},\"keys\":\"$snap-name\"}}}}}",
+	"body": "{\n  \"storage\": {\n    \"aliases\": {\n      \"snap-name\": {\n        \"pattern\": \"^[a-z\\\\d]{1,7}$\",\n        \"type\": \"string\"\n      },\n      \"snap-rev\": {\n        \"min\": 1,\n        \"type\": \"int\"\n      }\n    },\n    \"schema\": {\n      \"data\": {\n        \"schema\": {\n          \"revision\": {\n            \"keys\": \"$snap-name\",\n            \"type\": \"map\",\n            \"values\": {\n              \"min\": 1,\n              \"type\": \"int\"\n            }\n          }\n        }\n      },\n      \"snaps\": {\n        \"keys\": \"$snap-name\",\n        \"values\": {\n          \"schema\": {\n            \"status\": {\n              \"choices\": [\n                \"enabled\",\n                \"disabled\"\n              ],\n              \"type\": \"string\"\n            }\n          }\n        }\n      }\n    }\n  }\n}",
 	"timestamp": "2024-02-26T14:31:32Z"
 }

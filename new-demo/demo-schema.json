@@ -2,21 +2,21 @@
 {
   "storage": {
 		"aliases": {
-			"snap-name": {
+			"svc-name": {
 				"type": "string",
 				"pattern": "^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$"
 			}
 		},
 		"schema": {
       "statuses": {
-				"keys": "$snap-name",
+				"keys": "$svc-name",
 				"values": {
 					"type": "string",
-					"choices": ["enabled", "disabled"]
+					"choices": ["up", "down"]
 				}
       },
 			"snaps": {
-				"keys": "$snap-name",
+				"keys": "$svc-name",
 				"values": {
 					"schema": {
 						"revision": {

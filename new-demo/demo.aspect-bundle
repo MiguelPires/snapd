@@ -3,7 +3,12 @@ authority-id: NI7Jstuu8gffcoXr02i1kYt898p6Co0A
 account-id: NI7Jstuu8gffcoXr02i1kYt898p6Co0A
 name: services
 aspects:
-  statuses:
+  all:
+    rules:
+      -
+        request: statuses
+        storage: statuses
+  single:
     rules:
       -
         request: snapd.status
@@ -14,9 +19,6 @@ aspects:
       -
         request: {svc}.revision
         storage: snaps.{svc}.revision
-      -
-        request: statuses
-        storage: statuses
 timestamp: 2024-03-25T14:31:32Z
 body-length: 580
 sign-key-sha3-384: MwnYsB0vnhCuWmR9gtxL3mgLYtk6uU8KDUzpf6klA43pceWd1mRxf0WUawk75HEe
@@ -55,13 +57,13 @@ sign-key-sha3-384: MwnYsB0vnhCuWmR9gtxL3mgLYtk6uU8KDUzpf6klA43pceWd1mRxf0WUawk75
   }
 }
 
-AcLBcwQAAQoAHRYhBNDLFCN53St/SiQBL1sZV6rdPCpOBQJmBWmQAAoJEFsZV6rdPCpOIx0QAKJ/
-9xr4YyhwHv0khfnzsEl7qKQmNSnr+G+kGiiPqo//NEdWTvOayYTil59sVT/mfK825V2aZMPir74E
-/vwjY2+2a6+AKY1WVG5zLz4MEdb5+obPG0L/rk1/pA7jKgSDpDNF1POF3+Qr+jwAL++z3PY9NEIb
-30J0iAWVsivay8oZLRgqFga6XdHkP1fR6+d6pl2AxwnEGQHJTg9ExAiLPuFaauGrQS9K1HQbCijZ
-YJdT+euOl2KzIhT7IgCRqrDFHbOzlisaoBMaJ6nK/OuFFtorcRF6adgFmIWk5YF5vJRZpaeIFiEU
-DAj3QppGxk4yddGK2EDtCDxl3xHijVmMkuqFSfZYYZm9HYcLcTXHomUmXadQhNnM7G1kntDBO2uQ
-bEUMFXN1wbYjeO3UpEm0E0VNsYo7sXz2sRwUrX8IwjjLqZqGUA8zbxgUrpAGsRpnYMxF2XcFRBib
-NO1BdtRBL43S4DE6Lg2G6NMzRo0zP/JmH/ezGFn2xXrQq+twmb5JffbAwCBIr1ZTx9pIagcxqsrt
-yAqeK5woYXKZwqE42jebFUiKlXV4Qwu4AocdzN3PLO3MFP4y4sAQ9CGJZYWHdI5TtsPtgq7dimZO
-d9zQev76oJSOZaN/qJQS8kaWyO1nEVBwCQ8uemWbbuMNyN67WSEDXD+lxhL4DmotMi6EoWTv
+AcLBcwQAAQoAHRYhBNDLFCN53St/SiQBL1sZV6rdPCpOBQJmDSDjAAoJEFsZV6rdPCpOj80QANEr
+EkwnWGqTtCIyFuBTEnM+nQY17GYgwsW8orFWHfoGou6HcWIukGvfZeKcaC/U2gHyIzxC3H6ARIWH
+BLqItcFx1sw0vVm4Qb6t50MkH620bDt9vnhcEPdes8Wj25TE1HQbRuDrf4Cm5RlWvT2jFNSrrrIx
+/gYDf2pW0yQMBA4YZxWjoKn/KgYZ1bEKsQyr/a4bgjGGM1nc87cwDvTJB3O32/5RdCtP/7KMWmsx
+W1ZxXQMgi5cwZurDfejke/LP20b1t8S1KLbTrPeeuQg93dgZiFETwwaxckVK/VCqxeQ5Vao6zZrv
+1Azs9xBxDN0OqmPfwKrfIW7h1EVf2M9U/3/8nGMn80EZu4wllPh6gZ/qT0wPZ4XQkOnCbhLGav+r
+w4CHQQtFaIyvA6hBxkkSuXNqzsIl1tvRyHk3qAJWmTqLf6iOhhJ4A6NIvldcqchPtQdkK2mjN9YL
+2U8/sN3DO7AxY0XF5fDD/bMl+pA7k9qsiY3oSQjWODcMVXW9ZAUXd2MbLJM7yiO/blQi1SecqsE9
+JhOvL8WM3871RXSfbWSA/Ee6AyZCWn+sqwy1hO/wn8Ipv5dniqjaDs7dKsPto4qTIkjY0iJOP/J4
+6zlxooyK5R4mXUatIfuUIBdHW93rsutruGqaAiBdDGqgz7V56JfV+hslMon6+B2nkGkC47Q+

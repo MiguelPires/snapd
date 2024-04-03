@@ -4,11 +4,15 @@
 	"authority-id": "NI7Jstuu8gffcoXr02i1kYt898p6Co0A",
 	"name": "services",
 	"aspects": {
-		"statuses": {
+		"single": {
 			"rules": [
 				{"request": "snapd.status", "storage": "statuses.snapd"},
 				{"request": "{svc}.status", "storage": "statuses.{svc}"},
-				{"request": "{svc}.revision", "storage": "snaps.{svc}.revision"},
+				{"request": "{svc}.revision", "storage": "snaps.{svc}.revision"}
+			]
+		},
+		"all": {
+			"rules": [
 				{"request": "statuses", "storage": "statuses"}
 			]
 		}

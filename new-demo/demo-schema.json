@@ -2,26 +2,31 @@
 {
   "storage": {
 		"aliases": {
-			"svc-name": {
+			"sen-name": {
 				"type": "string",
 				"pattern": "^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$"
 			}
 		},
 		"schema": {
-      "statuses": {
-				"keys": "$svc-name",
+			"power-modes": {
+				"keys": "$sen-name",
 				"values": {
 					"type": "string",
-					"choices": ["up", "down"]
+					"choices": ["on", "off", "low-power"]
 				}
-      },
-			"snaps": {
-				"keys": "$svc-name",
+			},
+			"params": {
+				"keys": "$sen-name",
 				"values": {
 					"schema": {
-						"revision": {
+						"sample-min": {
+							"type": "number",
+							"min": -273.15,
+							"max": 5600
+						},
+						"sample-rate": {
 							"type": "int",
-							"min": 1
+							"choices": [100, 500, 800]
 						}
 					}
 				}

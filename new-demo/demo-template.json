@@ -2,21 +2,30 @@
 	"type": "aspect-bundle",
 	"account-id": "NI7Jstuu8gffcoXr02i1kYt898p6Co0A",
 	"authority-id": "NI7Jstuu8gffcoXr02i1kYt898p6Co0A",
-	"name": "services",
+	"name": "sensors",
 	"aspects": {
-		"single": {
+		"read-params": {
+			"summary": "Read sensor parameters (sample rate, minimum activation value)",
 			"rules": [
-				{"request": "snapd.status", "storage": "statuses.snapd"},
-				{"request": "{svc}.status", "storage": "statuses.{svc}"},
-				{"request": "{svc}.revision", "storage": "snaps.{svc}.revision"}
+				{"request": "{sen}.sample-min", "storage": "params.{sen}.sample-min", "access": "read"},
+				{"request": "{sen}.sample-rate", "storage": "params.{sen}.sample-rate", "access": "read"}
 			]
 		},
-		"all": {
+		"control": {
+			"summary": "Control sensor and update sensor parameters",
 			"rules": [
-				{"request": "statuses", "storage": "statuses"}
+				{"request": "{sen}.power-mode", "storage": "power-modes.{sen}"},
+				{"request": "{sen}.sample-min", "storage": "params.{sen}.sample-min"},
+				{"request": "{sen}.sample-rate", "storage": "params.{sen}.sample-rate"}
+			]
+		},
+		"read-mode": {
+			"summary": "Read intended sensor state",
+			"rules": [
+				{"request": "{sen}.power-mode", "storage": "power-modes.{sen}"}
 			]
 		}
 	},
-	"body": "{\n  \"storage\": {\n    \"aliases\": {\n      \"svc-name\": {\n        \"pattern\": \"^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$\",\n        \"type\": \"string\"\n      }\n    },\n    \"schema\": {\n      \"snaps\": {\n        \"keys\": \"$svc-name\",\n        \"values\": {\n          \"schema\": {\n            \"revision\": {\n              \"min\": 1,\n              \"type\": \"int\"\n            }\n          }\n        }\n      },\n      \"statuses\": {\n        \"keys\": \"$svc-name\",\n        \"values\": {\n          \"choices\": [\n            \"up\",\n            \"down\"\n          ],\n          \"type\": \"string\"\n        }\n      }\n    }\n  }\n}",
+	"body": "{\n  \"storage\": {\n    \"aliases\": {\n      \"sen-name\": {\n        \"pattern\": \"^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$\",\n        \"type\": \"string\"\n      }\n    },\n    \"schema\": {\n      \"params\": {\n        \"keys\": \"$sen-name\",\n        \"values\": {\n          \"schema\": {\n            \"sample-min\": {\n              \"max\": 5600,\n              \"min\": -273.15,\n              \"type\": \"number\"\n            },\n            \"sample-rate\": {\n              \"choices\": [\n                100,\n                500,\n                800\n              ],\n              \"type\": \"int\"\n            }\n          }\n        }\n      },\n      \"power-modes\": {\n        \"keys\": \"$sen-name\",\n        \"values\": {\n          \"choices\": [\n            \"on\",\n            \"off\",\n            \"low-power\"\n          ],\n          \"type\": \"string\"\n        }\n      }\n    }\n  }\n}",
 	"timestamp": "2024-03-25T14:31:32Z"
 }

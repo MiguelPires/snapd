@@ -1,54 +1,77 @@
 type: aspect-bundle
 authority-id: NI7Jstuu8gffcoXr02i1kYt898p6Co0A
 account-id: NI7Jstuu8gffcoXr02i1kYt898p6Co0A
-name: services
+name: sensors
 aspects:
-  all:
+  control:
     rules:
       -
-        request: statuses
-        storage: statuses
-  single:
+        request: {sen}.power-mode
+        storage: power-modes.{sen}
+      -
+        request: {sen}.sample-min
+        storage: params.{sen}.sample-min
+      -
+        request: {sen}.sample-rate
+        storage: params.{sen}.sample-rate
+    summary: Control sensor and update sensor parameters
+  read-mode:
     rules:
       -
-        request: snapd.status
-        storage: statuses.snapd
+        request: {sen}.power-mode
+        storage: power-modes.{sen}
+    summary: Read intended sensor state
+  read-params:
+    rules:
       -
-        request: {svc}.status
-        storage: statuses.{svc}
+        access: read
+        request: {sen}.sample-min
+        storage: params.{sen}.sample-min
       -
-        request: {svc}.revision
-        storage: snaps.{svc}.revision
+        access: read
+        request: {sen}.sample-rate
+        storage: params.{sen}.sample-rate
+    summary: Read sensor parameters (sample rate, minimum activation value)
 timestamp: 2024-03-25T14:31:32Z
-body-length: 580
+body-length: 824
 sign-key-sha3-384: MwnYsB0vnhCuWmR9gtxL3mgLYtk6uU8KDUzpf6klA43pceWd1mRxf0WUawk75HEe
 
 {
   "storage": {
     "aliases": {
-      "svc-name": {
+      "sen-name": {
         "pattern": "^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$",
         "type": "string"
       }
     },
     "schema": {
-      "snaps": {
-        "keys": "$svc-name",
+      "params": {
+        "keys": "$sen-name",
         "values": {
           "schema": {
-            "revision": {
-              "min": 1,
+            "sample-min": {
+              "max": 5600,
+              "min": -273.15,
+              "type": "number"
+            },
+            "sample-rate": {
+              "choices": [
+                100,
+                500,
+                800
+              ],
               "type": "int"
             }
           }
         }
       },
-      "statuses": {
-        "keys": "$svc-name",
+      "power-modes": {
+        "keys": "$sen-name",
         "values": {
           "choices": [
-            "up",
-            "down"
+            "on",
+            "off",
+            "low-power"
           ],
           "type": "string"
         }
@@ -57,13 +80,13 @@ sign-key-sha3-384: MwnYsB0vnhCuWmR9gtxL3mgLYtk6uU8KDUzpf6klA43pceWd1mRxf0WUawk75
   }
 }
 
-AcLBcwQAAQoAHRYhBNDLFCN53St/SiQBL1sZV6rdPCpOBQJmDSDjAAoJEFsZV6rdPCpOj80QANEr
-EkwnWGqTtCIyFuBTEnM+nQY17GYgwsW8orFWHfoGou6HcWIukGvfZeKcaC/U2gHyIzxC3H6ARIWH
-BLqItcFx1sw0vVm4Qb6t50MkH620bDt9vnhcEPdes8Wj25TE1HQbRuDrf4Cm5RlWvT2jFNSrrrIx
-/gYDf2pW0yQMBA4YZxWjoKn/KgYZ1bEKsQyr/a4bgjGGM1nc87cwDvTJB3O32/5RdCtP/7KMWmsx
-W1ZxXQMgi5cwZurDfejke/LP20b1t8S1KLbTrPeeuQg93dgZiFETwwaxckVK/VCqxeQ5Vao6zZrv
-1Azs9xBxDN0OqmPfwKrfIW7h1EVf2M9U/3/8nGMn80EZu4wllPh6gZ/qT0wPZ4XQkOnCbhLGav+r
-w4CHQQtFaIyvA6hBxkkSuXNqzsIl1tvRyHk3qAJWmTqLf6iOhhJ4A6NIvldcqchPtQdkK2mjN9YL
-2U8/sN3DO7AxY0XF5fDD/bMl+pA7k9qsiY3oSQjWODcMVXW9ZAUXd2MbLJM7yiO/blQi1SecqsE9
-JhOvL8WM3871RXSfbWSA/Ee6AyZCWn+sqwy1hO/wn8Ipv5dniqjaDs7dKsPto4qTIkjY0iJOP/J4
-6zlxooyK5R4mXUatIfuUIBdHW93rsutruGqaAiBdDGqgz7V56JfV+hslMon6+B2nkGkC47Q+
+AcLBcwQAAQoAHRYhBNDLFCN53St/SiQBL1sZV6rdPCpOBQJmDn/EAAoJEFsZV6rdPCpOnD4P/2lp
+5ZnYKyeWu55unOaHMFtx5RIwjYCOsj5njcU/pFff4AY3c17qkXyUCWBDlEvYZklQ0swjY88vWExl
+dZVlwPhq0g3FF2g5RVH/PYnSIATYKlpJu8llNH9q3vhry9hODa8w13mGE8JqUApWK44SSBii2FRk
+PnKSxDIZKo3odqtIyx/Cwcj30HW29od6GXIG8EDTim4S8+8pNYFLGNRVWjPywjNUBnap40gr4vih
+06dfskZXOolCHGktzJjyKTxRPhpxv4ysGPvX6TFiEE+fBAuuCBmwgC55EadabIArpw9YpD+c4dw+
++0de0bWqiMauezYWuRE5zOoK+Bu7zzRkUZIMEo9+n9rsUtr1k93i1f7iW3/kYBolXt5z9poLN96s
+XF38ciItvPwVZjdmYKM9Rqse60Z6auUF/YqUGrptsvwVzNDoBhmnk7DM3STYabEfXm9lPdkAKIsk
+JJcbrVrFrAVyzHriXBsOZnFetj64PqUFjiN6FU3+EQRkN7qsTyyJn9Xpd+UiJmkQyAfmQMk++Btu
+XMEXwhwcYVCrBrdvNff9ktdiCUQy1Ncz9UoPr2VW8FBlHDVY1Xgr6fz4rgI30oVjbWMiUCyDIKrL
+Y2Phcacl/16Pz4lgd3O+v2Q/3OCrO75oG6i4+lJVJVZRH+TACvQ6OnHx9YBX4BwwEK3O6U1b

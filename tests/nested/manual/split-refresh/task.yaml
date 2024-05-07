@@ -198,7 +198,7 @@ execute: |
   CHG_ID=$(remote.exec snap changes | grep "Install.*from files" | awk '{print $1}')
 
   echo "Check that the essential snaps' refresh is pending on a reboot"
-  remote.retry -n 20 "snap change $CHG_ID" | MATCH "Task set to wait until a system restart"
+  remote.retry -n 20 "snap change $CHG_ID | MATCH \"Task set to wait until a system restart\""
   remote.exec "snap change $CHG_ID" | MATCH "Wait.*Make snap \"pc-kernel\".*available"
   for snap in pc core22; do
     remote.exec "snap change $CHG_ID" | MATCH "Done.*Make snap \"$snap\".* available to the system"
@@ -209,14 +209,14 @@ execute: |
   remote.exec "snap change $CHG_ID" | MATCH "Do.*Ensure prerequisites for \"test-snapd-tools-core22\" are available"
 
   echo "But snapd and the other app's refresh has finished"
-  remote.retry -n 20 "snap change $CHG_ID" | MATCH "Done.*Run health check.*snapd"
-  remote.retry -n 20 "snap change $CHG_ID" | MATCH "Done.*Run health check.*test-snapd-sh"
+  remote.retry --wait 3 -n 10 "snap change $CHG_ID | MATCH \"Done.*Run health check.*snapd\""
+  remote.retry --wait 3 -n 10 "snap change $CHG_ID | MATCH \"Done.*Run health check.*test-snapd-sh\""
 
   BOOT_ID=$(tests.nested boot-id)
   remote.exec sudo reboot || true
   remote.wait-for reboot --wait 10 -n 90 "$BOOT_ID"
 
   echo "After a reboot, the kernel and gadget snaps' refresh is done"
-  remote.retry --wait 5 -n 90 "snap changes" | MATCH "$CHG_ID.*Done.*Install"
+  remote.retry --wait 5 -n 20 "snap changes | MATCH \"$CHG_ID.*Done.*Install\""
   remote.exec "snap change $CHG_ID" | MATCH "Done.*Run health check.*pc"
   remote.exec "snap change $CHG_ID" | MATCH "Done.*Run health check.*pc-kernel"

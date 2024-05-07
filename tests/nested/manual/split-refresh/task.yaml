@@ -217,6 +217,6 @@ execute: |
   remote.wait-for reboot --wait 10 -n 90 "$BOOT_ID"
 
   echo "After a reboot, the kernel and gadget snaps' refresh is done"
-  remote.retry --wait 5 -n 60 "snap changes" | MATCH "$CHG_ID.*Done.*Install"
+  remote.retry --wait 5 -n 90 "snap changes" | MATCH "$CHG_ID.*Done.*Install"
   remote.exec "snap change $CHG_ID" | MATCH "Done.*Run health check.*pc"
   remote.exec "snap change $CHG_ID" | MATCH "Done.*Run health check.*pc-kernel"

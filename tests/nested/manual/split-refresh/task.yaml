@@ -27,8 +27,7 @@ prepare: |
   snap install test-snapd-curl --devmode --edge
   snap install jq --devmode --edge
   if [ -d /var/lib/snapd/seed ]; then
-    tests.backup prepare /var/lib/snapd/seed
-    tests.cleanup defer tests.backup restore /var/lib/snapd/seed
+    mv /var/lib/snapd/seed /var/lib/snapd/seed.orig
   fi
   "$TESTSTOOLS"/store-state setup-fake-store "$STORE_DIR"
 
@@ -38,12 +37,10 @@ restore: |
       echo "This test needs test keys to be trusted"
       exit
   fi
-
-  # if the seed was a directory, prepare has already deferred a restore
-  if [ ! -d /var/lib/snapd/seed ]; then
-    rm -f /var/lib/snapd/seed
+  rm -rf /var/lib/snapd/seed
+  if [ -d /var/lib/snapd/seed.orig ]; then
+      mv /var/lib/snapd/seed.orig /var/lib/snapd/seed
   fi
-
   "$TESTSTOOLS"/store-state teardown-fake-store "$STORE_DIR"
   rm -rf ./classic-root
 

@@ -38,7 +38,12 @@ restore: |
       echo "This test needs test keys to be trusted"
       exit
   fi
-  rm -rf /var/lib/snapd/seed
+
+  # if the seed was a directory, prepare has already deferred a restore
+  if [ ! -d /var/lib/snapd/seed ]; then
+    rm -f /var/lib/snapd/seed
+  fi
+
   "$TESTSTOOLS"/store-state teardown-fake-store "$STORE_DIR"
   rm -rf ./classic-root
 

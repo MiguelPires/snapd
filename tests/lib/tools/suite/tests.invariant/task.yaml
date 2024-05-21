@@ -69,3 +69,5 @@ execute: |
         systemctl stop superfluous-dbus.service
         tests.invariant check stray-dbus-daemon 2>&1 | MATCH 'tests.invariant: stray-dbus-daemon ok'
     fi
+
+    # TODO: add check for tests.invariant check-systemd-conf

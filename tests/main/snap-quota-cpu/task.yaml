@@ -97,7 +97,7 @@ execute: |
     local n
 
     n=0
-    until [ "$n" -ge 5 ]
+    until [ "$n" -ge 15 ]
     do
       # We use 'top' here to get the current CPU usage as top sorts by CPU usage, 
       # so we assume that 'stress' is going to lie in the top as the odds of another

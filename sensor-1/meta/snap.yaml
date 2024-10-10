@@ -1,0 +1,12 @@
+name: sensor-1
+version: 1.0
+apps:
+  sh:
+    command: /bin/sh
+base: core24
+
+plugs:
+  read-parameters:
+    interface: registry
+    account: NI7Jstuu8gffcoXr02i1kYt898p6Co0A
+    view: sensors/read-sensor-1-parameters

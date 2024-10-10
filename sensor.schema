@@ -1,0 +1,31 @@
+{
+  "storage": {
+    "aliases": {
+      "sen-name": {
+        "pattern": "^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$",
+        "type": "string"
+      }
+    },
+    "schema": {
+			"min-activation": {
+        "keys": "$sen-name",
+				"values": {
+					"max": 5600,
+					"min": -273.15,
+        	"type": "number"
+				}
+			},	
+      "sample-rate": {
+        "keys": "$sen-name",
+				"values": {
+					"choices": [
+						100,
+            500,
+            800
+          ],
+          "type": "int"
+				}
+			}
+    }
+  }
+}

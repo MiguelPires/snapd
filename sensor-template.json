@@ -1,0 +1,31 @@
+{
+	"type": "registry",
+	"account-id": "NI7Jstuu8gffcoXr02i1kYt898p6Co0A",
+	"authority-id": "NI7Jstuu8gffcoXr02i1kYt898p6Co0A",
+	"name": "sensors",
+	"views": {
+		"configure-sensors": {
+			"summary": "Configure sensor parameters",
+			"rules": [
+				{"request": "{sen}.min-activation", "storage": "min-activation.{sen}"},
+				{"request": "{sen}.sample-rate", "storage": "sample-rate.{sen}"}
+			]
+		},
+		"read-sensor-1-parameters": {
+			"summary": "Read sensor 1 parameters (sample rate, minimum activation value)",
+			"rules": [
+				{"request": "sensor-1.min-activation", "storage": "min-activation.sensor-1", "access": "read"},
+				{"request": "sensor-1.sample-rate", "storage": "sample-rate.sensor-1", "access": "read"}
+			]
+		},
+		"read-sensor-2-parameters": {
+			"summary": "Read sensor 2 parameters (sample rate, minimum activation value)",
+			"rules": [
+				{"request": "sensor-2.min-activation", "storage": "min-activation.sensor-2", "access": "read"},
+				{"request": "sensor-2.sample-rate", "storage": "sample-rate.sensor-2", "access": "read"}
+			]
+		}
+	},
+	"body": "{\n  \"storage\": {\n    \"aliases\": {\n      \"sen-name\": {\n        \"pattern\": \"^(?:[a-z0-9]+-?)*[a-z](?:-?[a-z0-9])*$\",\n        \"type\": \"string\"\n      }\n    },\n    \"schema\": {\n      \"min-activation\": {\n        \"keys\": \"$sen-name\",\n        \"values\": {\n          \"max\": 5600,\n          \"min\": -273.15,\n          \"type\": \"number\"\n        }\n      },\n      \"sample-rate\": {\n        \"keys\": \"$sen-name\",\n        \"values\": {\n          \"choices\": [\n            100,\n            500,\n            800\n          ],\n          \"type\": \"int\"\n        }\n      }\n    }\n  }\n}",
+	"timestamp": "2024-10-09T19:31:32Z"
+}
